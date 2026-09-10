@@ -1,0 +1,117 @@
+import { expect, test } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
+
+test('loads assets, preserves layout, and presents project partners', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('O futurovai de bike.')
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page.locator('.hero-bike')).toBeVisible()
+  expect(await page.locator('.hero-bike').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.locator('#parceiros').scrollIntoViewIfNeeded()
+  await expect(page.locator('.origin-partner')).toContainText('woie')
+  await expect(page.locator('.partner-grid')).toContainText('UNIDAVI')
+  await expect(page.locator('.partner-grid')).toContainText('cinf')
+  await expect(page.locator('.partner-grid')).toContainText('Unimed')
+  expect(errors).toEqual([])
+})
+
+test('impact slider updates the community and its explicit scenario', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  const range = page.getByRole('slider')
+  await range.fill('60')
+  await expect(page.getByTestId('bikes-result')).toHaveText('60')
+  await expect(page.getByTestId('trips-result')).toHaveText('2.640')
+  await expect(page.getByTestId('hours-result')).toHaveText('660 h')
+  await expect(page.getByRole('img', { name: /comunidade com 60 pessoas/ })).toBeVisible()
+  await range.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByTestId('bikes-result')).toHaveText('61')
+  await expect(page.locator('#impact-assumptions')).toContainText('Não representa resultados atuais')
+})
+
+test('scroll expands the community and manual exploration stays under visitor control', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile', 'Desktop has the full pinned scroll narrative; mobile uses a compact scene.')
+  await page.goto('/')
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page.locator('.hero-word').first()).toBeVisible()
+  const bounds = await page.locator('#impacto').evaluate(element => ({ top: element.getBoundingClientRect().top + window.scrollY, height: element.getBoundingClientRect().height }))
+  await page.evaluate(y => window.scrollTo({ top: y, behavior: 'instant' }), bounds.top)
+  await expect.poll(async () => Number(await page.getByTestId('bikes-result').textContent())).toBeGreaterThan(1)
+  await page.evaluate(y => window.scrollTo({ top: y, behavior: 'instant' }), bounds.top + bounds.height - 950)
+  await expect(page.getByTestId('bikes-result')).toHaveText('120')
+  const range = page.getByRole('slider')
+  await range.fill('30')
+  await page.evaluate(() => window.scrollBy({ top: -100, behavior: 'instant' }))
+  await expect(page.getByTestId('bikes-result')).toHaveText('30')
+  await page.getByRole('button', { name: 'Seguir o scroll' }).click()
+  await expect.poll(async () => Number(await page.getByTestId('bikes-result').textContent())).toBeGreaterThan(30)
+})
+
+test('campaign concepts change and FAQ expands', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.getByRole('button', { name: /Sua marca presente/ }).click()
+  await expect(page.locator('.campaign-poster h3')).toContainText('Sua marcavai junto.A cidade muda.')
+  await expect(page.getByRole('button', { name: /Sua marca presente/ })).toHaveAttribute('aria-pressed', 'true')
+  await page.locator('summary').filter({ hasText: 'As bicicletas serão gratuitas?' }).click()
+  await expect(page.locator('details[open]')).toContainText('O modelo de acesso está em construção')
+})
+
+test('contact validates fields, prepares a real downloadable message, and restores focus', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  const opener = page.getByRole('button', { name: 'Quero impulsionar essa ideia' })
+  await opener.click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole('button', { name: 'Preparar minha apresentação' }).click()
+  await expect(dialog.getByRole('textbox', { name: 'Seu nome' })).toBeFocused()
+  await dialog.getByRole('textbox', { name: 'Seu nome' }).fill('Pessoa de teste')
+  await dialog.getByRole('textbox', { name: 'Organização' }).fill('Empresa exemplo')
+  await dialog.getByRole('textbox', { name: 'E-mail' }).fill('teste@example.com')
+  await dialog.getByRole('button', { name: 'Preparar minha apresentação' }).click()
+  await expect(dialog.getByRole('heading', { name: 'Sua apresentação está pronta.' })).toBeVisible()
+  await expect(dialog).toContainText('Nenhuma mensagem foi enviada.')
+  const downloadPromise = page.waitForEvent('download')
+  await dialog.getByRole('button', { name: 'Baixar apresentação' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toBe('meu-interesse-pedalfree.txt')
+  const stream = await download.createReadStream()
+  const chunks: Buffer[] = []
+  for await (const chunk of stream!) chunks.push(Buffer.from(chunk))
+  expect(Buffer.concat(chunks).toString()).toContain('Organização: Empresa exemplo')
+  await page.keyboard.press('Escape')
+  await expect(dialog).not.toBeVisible()
+  await expect(opener).toBeFocused()
+})
+
+test('navigation works with a keyboard and on narrow screens', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  if (testInfo.project.name === 'mobile') {
+    const toggle = page.getByRole('button', { name: 'Abrir menu', exact: true })
+    await toggle.click()
+    await expect(page.getByRole('button', { name: 'Fechar menu', exact: true })).toHaveAttribute('aria-expanded', 'true')
+    await page.getByRole('navigation').getByRole('link', { name: 'Como funciona', exact: true }).click()
+    await expect(page).toHaveURL(/#como-funciona$/)
+    await expect(page.locator('#menu-toggle')).toHaveAttribute('aria-expanded', 'false')
+  } else {
+    await page.getByRole('navigation').getByRole('link', { name: 'O impacto', exact: true }).click()
+    await expect(page).toHaveURL(/#impacto$/)
+  }
+})
+
+test('page and contact dialog have no automated accessibility violations', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  await page.evaluate(() => document.fonts.ready)
+  const pageScan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+  expect(pageScan.violations.map(v => ({ id: v.id, nodes: v.nodes.map(n => ({ target: n.target, issue: n.failureSummary })) }))).toEqual([])
+  await page.getByRole('button', { name: 'Quero impulsionar essa ideia' }).click()
+  const dialogScan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+  expect(dialogScan.violations.map(v => ({ id: v.id, nodes: v.nodes.map(n => ({ target: n.target, issue: n.failureSummary })) }))).toEqual([])
+})
