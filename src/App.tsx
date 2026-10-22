@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowRight, ArrowUpRight, Bike, BusFront, Check, ChevronDown, Heart, Leaf, Menu, MoveUpRight, Pause, Play, Sparkles, TrendingUp, Users, X, Zap } from 'lucide-react'
+import { ArrowDown, ArrowRight, ArrowUpRight, Bike, Check, ChevronDown, Heart, Leaf, Menu, MoveUpRight, Pause, Play, Sparkles, TrendingUp, Users, X, Zap } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
@@ -7,6 +7,7 @@ import ImpactSection from './components/ImpactSection'
 import ContactDialog from './components/ContactDialog'
 import Logo from './components/ui/Logo'
 import PartnerLogo from './components/ui/PartnerLogo'
+import OperationSection from './components/OperationSection'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 
@@ -18,11 +19,6 @@ const faqs = [
   ['Quem está por trás do PedalFree?', 'O PedalFree tem origem na Woie, que convidou a Southbyte para desenvolver a empresa. Conta com o apoio de Unidavi, CINF e Unimed. As possibilidades de participação de novos parceiros são discutidas com a equipe.'],
 ]
 
-const campaigns = [
-  { tab: 'Um novo caminho', heading: <>Seu próximo<br />ponto pode ser<br /><em>de partida.</em></>, detail: 'Uma alternativa para os trajetos do dia a dia.', tag: 'MENOS ESPERA. MAIS VIDA.' },
-  { tab: 'Mais movimento', heading: <>O caminho<br />do trabalho.<br /><em>O seu ritmo.</em></>, detail: 'Assistência elétrica para uma rotina com mais movimento.', tag: 'TODO DIA PODE SER UM RECOMEÇO.' },
-  { tab: 'Sua marca presente', heading: <>Sua marca<br />vai junto.<br /><em>A cidade muda.</em></>, detail: 'Conecte sua marca à mobilidade do dia a dia.', tag: 'PRESENÇA QUE FAZ DIFERENÇA.' },
-]
 
 const imagePath = (name: string) => `${import.meta.env.BASE_URL}images/${name}`
 
@@ -31,7 +27,6 @@ export default function App() {
   const contactTriggerRef = useRef<HTMLElement | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [contactRole, setContactRole] = useState<string | null>(null)
-  const [campaign, setCampaign] = useState(0)
   const [paused, setPaused] = useState(false)
   const [systemReduced, setSystemReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const reduced = systemReduced || paused
@@ -75,7 +70,6 @@ export default function App() {
         gsap.fromTo('.manifesto-word', { color: '#adb7c1' }, { color: '#022647', stagger: .12, ease: 'none', scrollTrigger: { trigger: '.manifesto', start: 'top 68%', end: 'bottom 62%', scrub: .6 } })
         gsap.fromTo('.life-photo img', { yPercent: -7, scale: 1.1 }, { yPercent: 7, scale: 1.04, ease: 'none', scrollTrigger: { trigger: '.life-photo', start: 'top bottom', end: 'bottom top', scrub: 1 } })
         gsap.fromTo('.life-photo', { clipPath: 'inset(0 5% round 24px)' }, { clipPath: 'inset(0 0% round 0px)', ease: 'none', scrollTrigger: { trigger: '.life-photo', start: 'top 85%', end: 'top 20%', scrub: 1 } })
-        gsap.to('.poster-frame', { y: -24, rotation: -2, ease: 'none', scrollTrigger: { trigger: '.campaign-section', start: 'top bottom', end: 'bottom top', scrub: 1 } })
       }, rootRef)
       ScrollTrigger.refresh()
     })
@@ -146,10 +140,7 @@ export default function App() {
 
       <section className="life-photo" aria-labelledby="life-title"><img src={imagePath('morning-ride.webp')} alt="Cena ilustrativa de duas pessoas com capacete pedalando e-bikes em uma rua arborizada pela manhã." width="1600" height="1067" loading="lazy" /><div className="life-overlay" /><div className="life-content section-shell"><h2 id="life-title">O destino é o mesmo.<br /><em>A sua vida, em outro ritmo.</em></h2><span className="life-caption"><Bike size={18} /> MAIS MOVIMENTO CABE NO SEU DIA.</span></div><span className="life-credit">Cenário ilustrativo do PedalFree</span></section>
 
-      <section className="campaign-section section-shell" aria-labelledby="campaign-title">
-        <div className="campaign-copy" data-reveal><h2 id="campaign-title">A mudança começa<br /><em>no ponto de ônibus.</em></h2><p>Os conceitos de campanha abaixo convidam quem faz o mesmo trajeto todos os dias a conhecer outra possibilidade de deslocamento.</p><p>A assistência elétrica acompanha a pedalada. As campanhas destacam esse recurso e a possibilidade de incluir mais movimento na rotina.</p><div className="campaign-selector" role="group" aria-label="Escolher conceito de campanha">{campaigns.map((item, index) => <button key={item.tab} aria-pressed={campaign === index} className={campaign === index ? 'selected' : ''} onClick={() => setCampaign(index)}><span>0{index + 1}</span>{item.tab}<ArrowUpRight size={16} /></button>)}</div><span className="campaign-note">Explore acima os conceitos de campanha.</span></div>
-        <div className="bus-scene" data-reveal><div className="bus-stop-sign"><BusFront size={22} /><span>UM NOVO<br />PONTO DE VISTA</span></div><div className="scene-orbit" aria-hidden="true" /><div className="poster-frame"><div className={`campaign-poster poster-${campaign}`} key={campaign}><Logo /><span className="poster-eyebrow">{campaigns[campaign].tag}</span><h3>{campaigns[campaign].heading}</h3><div className="poster-bike"><img src={imagePath('ebike-cutout.webp')} alt="" width="1440" height="960" loading="lazy" /></div><p>{campaigns[campaign].detail}</p><span className="poster-bottom">VEM DE PEDALFREE <ArrowUpRight size={20} /></span></div></div><span className="scene-caption">CONCEITO DE CAMPANHA · MÍDIA URBANA</span></div>
-      </section>
+      <OperationSection onContact={() => openContact('parceiro')} />
 
       <section className="partners-section" id="parceiros" aria-labelledby="partners-title"><div className="section-shell"><div className="section-heading" data-reveal><div><h2 id="partners-title">Gente que acredita.<br /><em>Gente que faz junto.</em></h2></div><p>Com origem na Woie, desenvolvimento pela Southbyte<br />e apoio de Unidavi, CINF e Unimed.<br />Já são 3 bicicletas disponíveis em Rio do Sul, uma por parceiro.</p></div><div className="partner-grid" data-reveal><div className="origin-partner"><span className="partner-type">IDEALIZAÇÃO</span><PartnerLogo name="woie" /><p>A Woie deu origem ao PedalFree e convidou a Southbyte para desenvolver a empresa.</p></div><div className="partner-cell"><span className="partner-type">DESENVOLVIMENTO</span><PartnerLogo name="southbyte" /></div><div className="partner-cell"><span className="partner-type">APOIO</span><PartnerLogo name="unidavi" /></div><div className="partner-cell"><span className="partner-type">APOIO</span><PartnerLogo name="cinf" /></div><div className="partner-cell"><span className="partner-type">APOIO</span><PartnerLogo name="unimed" /></div></div><div className="partner-invitation"><span><span className="empty-partner"><span>+</span> SUA MARCA AQUI</span>O próximo capítulo pode ter a sua marca.</span><button className="text-link" onClick={() => openContact('parceiro')}>Vamos construir juntos <ArrowUpRight size={18} /></button></div></div></section>
 
