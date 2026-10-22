@@ -23,7 +23,7 @@ export default function ContactDialog({ initialRole, onClose }: { initialRole: s
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const text = `Olá, equipe PedalFree!\n\nQuero participar como ${data.get('role')}.\n\nNome: ${data.get('name')}\nOrganização: ${data.get('company')}\nE-mail: ${data.get('email')}\n\n${data.get('message') || 'Gostaria de conhecer o projeto e conversar sobre possibilidades de parceria.'}`
+    const text = `Olá, equipe PedalFree!\n\nQuero participar como ${data.get('role')}.\n\nNome: ${data.get('name')}\nOrganização: ${data.get('company')}\nE-mail: ${data.get('email')}\n\n${data.get('message') || 'Gostaria de conhecer a empresa e conversar sobre possibilidades de parceria.'}`
     setMessage(text)
   }
 
@@ -41,16 +41,16 @@ export default function ContactDialog({ initialRole, onClose }: { initialRole: s
     }
   }}>
     <button className="dialog-close icon-button" onClick={onClose} aria-label="Fechar contato"><X size={22} /></button>
-    <span className="eyebrow"><span /> O PRÓXIMO PASSO É JUNTOS</span>
-    <h2 id="contact-title">Vamos colocar essa<br />ideia <em>em movimento?</em></h2>
+
+    <h2 id="contact-title">Vamos levar a<br />mobilidade <em>mais longe?</em></h2>
     {!message ? <>
-      <p className="dialog-intro">Conte um pouco sobre você e como gostaria de fazer parte do PedalFree.</p>
+      <p className="dialog-intro">{hasContact ? 'Prepare uma apresentação para a equipe e escolha como enviar pelo seu aplicativo.' : 'Prepare uma apresentação para baixar ou copiar. Este formulário não envia seus dados à equipe.'}</p>
       <form onSubmit={submit}>
         <label>Quero participar como<select name="role" defaultValue={initialRole}><option value="patrocinador">Patrocinador</option><option value="investidor">Investidor</option><option value="parceiro">Parceiro / apoiador</option></select></label>
         <div className="form-row"><label>Seu nome<input name="name" autoComplete="name" placeholder="Como podemos chamar você?" required maxLength={100} /></label><label>Organização<input name="company" autoComplete="organization" placeholder="Sua empresa ou instituição" required maxLength={120} /></label></div>
         <label>E-mail<input name="email" type="email" autoComplete="email" placeholder="voce@empresa.com.br" required maxLength={180} /></label>
-        <label>Sua ideia <span className="optional">(opcional)</span><textarea name="message" rows={3} maxLength={1500} placeholder="O que você gostaria de construir com a gente?" /></label>
-        <p className="privacy-note">Seus dados ficam nesta página até você compartilhar sua apresentação.</p>
+        <label>Sua mensagem <span className="optional">(opcional)</span><textarea name="message" rows={3} maxLength={1500} placeholder="O que você gostaria de construir com a gente?" /></label>
+        <p className="privacy-note">Preencher o formulário não envia uma mensagem. Você decide quando e como compartilhar sua apresentação.</p>
         <button className="button button-green full-width" type="submit">Preparar minha apresentação <ArrowUpRight size={19} /></button>
       </form>
     </> : <div className="contact-result">

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const shirts = ['#426354', '#a8b998', '#d4a373', '#dfd9c7', '#78908c', '#d1ee87', '#c28365', '#6e7b55']
+const shirts = ['#426354', '#a8b998', '#d4a373', '#dfd9c7', '#78908c', '#8ac426', '#c28365', '#6e7b55']
 const skins = ['#c28e68', '#8b5c42', '#dfb591', '#674432', '#bd8663']
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
 
@@ -31,7 +31,7 @@ function cyclist(ctx: CanvasRenderingContext2D, index: number, phase: number) {
       line(ctx, [x, 4, x + Math.cos(angle) * 10, 4 + Math.sin(angle) * 12], '#a1ac9b', .65)
     }
   }
-  line(ctx, [-21, 4, -9, -16, 0, 5, -21, 4, 11, -13, 21, 4], '#426958', 3)
+  line(ctx, [-21, 4, -9, -16, 0, 5, -21, 4, 11, -13, 21, 4], '#022647', 3)
   line(ctx, [-12, -19, -3, -19], '#223b33', 3)
   line(ctx, [11, -13, 9, -24, 16, -25], '#223b33', 2)
   line(ctx, [-19, -12, -29, -11], '#243c34', 2)
@@ -44,9 +44,9 @@ function cyclist(ctx: CanvasRenderingContext2D, index: number, phase: number) {
   line(ctx, [-3, -42, 7, -31, 14, -26], skin, 4)
   line(ctx, [-3, -42, 3, -34], shirt, 6)
   ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(0, -55, 6.3, 0, Math.PI * 2); ctx.fill()
-  ctx.fillStyle = index % 3 === 0 ? '#d1ee87' : '#203f34'
+  ctx.fillStyle = index % 3 === 0 ? '#8ac426' : '#022647'
   ctx.beginPath(); ctx.ellipse(-1, -59, 7.2, 4.7, .2, 0, Math.PI * 2); ctx.fill()
-  line(ctx, [-8, -43, -11, -29], '#203f34', 5)
+  line(ctx, [-8, -43, -11, -29], '#022647', 5)
 }
 
 export default function CrowdCanvas({ count, reduced }: { count: number; reduced: boolean }) {

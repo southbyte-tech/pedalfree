@@ -1,9 +1,10 @@
 export default function Logo({ compact = false }: { compact?: boolean }) {
-  return <span className="logo">
-    <svg viewBox="0 0 48 36" fill="none" aria-hidden="true">
-      <circle cx="11" cy="25" r="8.5" /><circle cx="37" cy="25" r="8.5" />
-      <path d="m11 25 10-18 6 18H11L32 10l5 15M17 7h10m1-5h7l-3 8" />
+  const base = import.meta.env.BASE_URL
+  return <span className={`logo${compact ? ' logo-compact' : ''}`}>
+    <svg viewBox={compact ? '130 290 660 560' : '130 235 1600 630'} role="img" aria-label="PedalFree">
+      <image className="logo-color" href={`${base}images/logo-color.png`} width="1920" height="1080" />
+      <image className="logo-navy" href={`${base}images/logo-navy.png`} width="1920" height="1080" />
+      <image className="logo-white" href={`${base}images/logo-white.png`} width="1920" height="1080" />
     </svg>
-    {!compact && <span>pedal<span className="logo-light">free</span><span className="logo-dot">↗</span></span>}
   </span>
 }
